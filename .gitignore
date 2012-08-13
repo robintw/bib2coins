@@ -1,0 +1,17 @@
+tmp_in.txt
+*.pyc
+.redcar
+build/*
+dist/*
+doc/build/*
+*/._redcar/*
+._redcar/
+Output.txt
+Py6S.egg-info
+OutputsJ.txt
+src/GetSpectra.py
+src/Test.py
+Py6S/build
+CHL
+*.mie
+*.png
