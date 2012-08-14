@@ -1,5 +1,8 @@
+#!/usr/bin/python
+
 from bibtex import bibparse
 import urllib
+import sys
 
 def parse_authors(authors_string):
 	authors = authors_string.split("and")
@@ -14,7 +17,13 @@ def parse_authors(authors_string):
 
 	return (lastname.strip(), initials.strip(), other_authors)
 
-entries = bibparse.parse_bib("/Users/robin/Documents/University/MyPublications/AcademicPortfolio/RobinWilson.bib")
+if len(sys.argv) != 2:
+	print "Usage: bib2coins bibtexfile.bib"
+	exit
+
+
+
+entries = bibparse.parse_bib(sys.argv[1])
 
 for i in range(len(entries)):
 	author1_last, author1_initials, authors = parse_authors(entries[i].data['author'])
@@ -33,11 +42,22 @@ for i in range(len(entries)):
 		data['rft.genre'] = "article"
 		data['rft.atitle'] = entries[i].data['title']
 		data['rft.jtitle'] = entries[i].data['journal']
+		#if "volume" in entries[i].data: data['rft.volume'] = entries[i].data['volume']
+
+		keys = { "volume": "rft.volume",
+				 "issue":  "rft.issue",
+				 "pages":  "rft.pages" }
+
+		for key, value in keys.iteritems():
+			if key in entries[i].data: data[value] = entries[i].data[key]
 	else:
+		# Do anything else - proceedings, books etc
 		start = "<span class='Z3988' title='url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook"
 		data['rft.genre'] = "proceeding"
 		data['rft.atitle'] =  entries[i].data['title']
 		data['rft.btitle'] = entries[i].data['booktitle']
+
+
 
 
 	s = ""
