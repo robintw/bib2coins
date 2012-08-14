@@ -19,7 +19,8 @@ def parse_authors(authors_string):
 
 if len(sys.argv) != 2:
 	print "Usage: bib2coins bibtexfile.bib"
-	exit
+	sys.exit()
+
 
 
 
