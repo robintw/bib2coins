@@ -6,7 +6,7 @@ setup(
     name = "bib2coins",
     packages = ['bibtex'],
     py_modules = ['bib2coins'],
-    scripts = ['bib2coins.py'],
+    scripts = ['bib2coins'],
     version = "0.1",
     author = "Robin Wilson",
     author_email = "robin@rtwilson.com",
