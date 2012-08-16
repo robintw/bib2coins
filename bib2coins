@@ -17,6 +17,9 @@ def parse_authors(authors_string):
 
 	return (lastname.strip(), initials.strip(), other_authors)
 
+def raw_value(x):
+	return x
+
 if len(sys.argv) != 2:
 	print "Usage: bib2coins bibtexfile.bib"
 	sys.exit()
@@ -37,20 +40,23 @@ for i in range(len(entries)):
 	end = "'></span>"
 
 
+
 	if entries[i].btype == "article":
 		# Do a journal article
-		start = "<span class='Z3988' title='url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal"
+		start = "<span class='Z3988' title='url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rfr_id=info%3Asid%2Fzotero.org%3A"
 		data['rft.genre'] = "article"
 		data['rft.atitle'] = entries[i].data['title']
 		data['rft.jtitle'] = entries[i].data['journal']
 		#if "volume" in entries[i].data: data['rft.volume'] = entries[i].data['volume']
 
-		keys = { "volume": "rft.volume",
-				 "issue":  "rft.issue",
-				 "pages":  "rft.pages" }
+		keys = { "volume": ("rft.volume", raw_value),
+				 "issue":  ("rft.issue", raw_value),
+				 "pages":  ("rft.pages", raw_value),
+				 "doi"  :  ("rft_id", lambda x: "info:doi/" + x)}
 
-		for key, value in keys.iteritems():
-			if key in entries[i].data: data[value] = entries[i].data[key]
+		for bibtex_item, processing_data in keys.iteritems():
+			coins_item, f = processing_data
+			if bibtex_item in entries[i].data: data[coins_item] = f(entries[i].data[bibtex_item])
 	else:
 		# Do anything else - proceedings, books etc
 		start = "<span class='Z3988' title='url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook"
@@ -64,14 +70,13 @@ for i in range(len(entries)):
 	s = ""
 
 	for key, value in data.iteritems():
-		s += "&" + key + "=" + value
+		s += "&amp;" + key + "=" + urllib.quote_plus(value)
 
 	# Do the authors bit as there can be many rft.au tags, which a dict can't cope with
 	for author in authors:
-		s += "&" + 'rft.au' + "=" + author
+		s += "&amp;" + 'rft.au' + "=" + author
 
-	s = urllib.quote(s)
-	s = s.replace(r"%26", "&amp;")
-	s = s.replace(r"%3D", "=")
+	#s = s.replace(r"%26", "&amp;")
+	#s = s.replace(r"%3D", "=")
 
 	print start + s + end
